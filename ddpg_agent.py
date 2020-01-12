@@ -46,11 +46,6 @@ class Agent():
         self.seed = random.seed(random_seed)
 
         # Actor Network (w/ Target Network)
-        # self.actor_local = Actor(state_size, action_size, random_seed).to(device)
-        # self.actor_target = Actor(state_size, action_size, random_seed).to(device)
-        # self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
-
-        # initialize Class level Actor Network
         if Agent.actor_local is None:
             Agent.actor_local = Actor(state_size, action_size, random_seed).to(device)
         if Agent.actor_target is None:
@@ -62,11 +57,6 @@ class Agent():
         self.actor_optimizer = Agent.actor_optimizer
 
         # Critic Network (w/ Target Network)
-#         self.critic_local = Critic(state_size, action_size, random_seed).to(device)
-#         self.critic_target = Critic(state_size, action_size, random_seed).to(device)
-#         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
-
-        # Initilise Class levell Critic Network
         if Agent.critic_local is None:
             Agent.critic_local = Critic(state_size, action_size, random_seed).to(device)
         if Agent.critic_target is None:
@@ -80,24 +70,21 @@ class Agent():
         # Noise process
         self.noise = OUNoise(action_size, random_seed)
 
-        # Replay memory - only intitialise once per class
         if Agent.memory is None:
             print("Initialising ReplayBuffer")
             Agent.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
-#         else:
-#             print("Sharing ReplayBuffer %s", Agent.memory)
 
     def step(self, time_step, state, action, reward, next_state, done):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
         Agent.memory.add(state, action, reward, next_state, done)
 
-        # only learn every n_time_steps
-        if time_step % N_TIME_STEPS != 0:
+       
+        if time_step % N_TIME_STEPS != 0: # only learn every N_TIME_STEPS
             return
 
-        # Learn, if enough samples are available in memory
-        if len(Agent.memory) > BATCH_SIZE:
+        
+        if len(Agent.memory) > BATCH_SIZE: 
             for i in range(N_LEARN_UPDATES):
                 experiences = Agent.memory.sample()
                 self.learn(experiences, GAMMA)

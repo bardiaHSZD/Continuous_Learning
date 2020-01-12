@@ -21,6 +21,12 @@ The observation space consists of 33 variables corresponding to position, rotati
 
 The agent training utilised the `ddpg` function in the `Continuous_Control` notebook. It continues episodical training via the the ddpg agent until `n_episoses` is reached or until the environment tis solved. As above, a reward of +0.1 is provided for each step that the agent's hand is in the goal location. The DDPG agent is contained in `ddpg_agent.py`.
 
+Recent implementation of “Deep Q Network” (DQN) algorithm has acheived a signficant progress in Reinforcement Learning, resulting in human level performance in playing Atari games. DQN is capable of solving problems with high-dimensional state space but faces limitations in dealing with high-dimensional continous action space and requires iterative optimazation process at each step.
+
+The DDPG agents used in this experiment consists of four deep neural networks, i.e. actor_local, actor_target, critic_local, and critic_target. It starts by taking actions in epsilon-greedy manner and adding tuple of <state, action, reward, next_state, done> to its replay buffer. At every N_TIME_STEPS (e.g. 20) steps (i.e. update_rate) it does a learning process N_LEARN_UPDATES (e.g. 10) times, by updating its local actor and critic networks; this includes backpropagation steps through each network to calculate gradients and finally applying a soft update to the target networks.
+
+For the exploration noise, an Ornstein-Uhlenbeck process noise with mu = 0.0, theta = 0.15, and sigma=0.2 is implemented. Temporally correlated noise are added to actions in order to explore well in physical environments with momentum. 
+
 ### DDPG Hyper Parameters
 
 Hyperparameters used are:
@@ -40,7 +46,8 @@ Hyperparameters used are:
 - Number of learn updates in memory samples = 10
 - Number of time steps required to start learning again = 20
 
-Actor and Critic network models were defined in 'ddpg_model.py'. The Actor networks utilised two fully connected layers with 256 and 128 units with relu activation and tanh activation for the action space. The network has an initial dimension the same as the state size. The Critic networks utilised two fully connected layers with 256 and 128 units with leaky_relu activation. The critic network has  an initial dimension the size of the state size plus action size.
+Actor and Critic network models were defined in `model.py`. The Actor networks utilised two fully connected layers with 256 and 128 units with relu activation and tanh activation for the action space. The network has an initial dimension the same as the state size. The Critic networks utilised two fully connected layers with 256+action_size and 128 units with leaky_relu activation. The critic network has  an initial dimension the size of the state size plus action size. Both architectures use learning rate of 1e-4 and Adam optimizer.
+
 
 ## Plot of Rewards
 
@@ -68,23 +75,25 @@ Using the saved checkpoints from the single-agent training, the results on the m
 </div>
 
 ```
-Episode 88	Score: 28.16	
-Episode 89	Score: 28.85	
-Episode 90	Score: 31.68	
-Episode 91	Score: 31.07	
-Episode 92	Score: 29.30	
-Episode 93	Score: 30.74	
-Episode 94	Score: 27.58	
-Episode 95	Score: 29.41	
-Episode 96	Score: 29.90	
-Episode 97	Score: 28.79	
-Episode 98	Score: 29.52	
-Episode 99	Score: 30.59	
-Episode 100	Score: 31.54		
+Episode 10	Score: 29.83	Average Score: 17.9095
+Episode 20	Score: 28.76	Average Score: 23.9681
+Episode 30	Score: 29.94	Average Score: 25.7205
+Episode 40	Score: 30.67	Average Score: 27.0211
+Episode 50	Score: 32.69	Average Score: 27.9301
+Episode 60	Score: 30.33	Average Score: 28.4783
+Episode 70	Score: 29.80	Average Score: 28.6604
+Episode 80	Score: 27.12	Average Score: 28.5960
+Episode 90	Score: 29.85	Average Score: 28.6900
+Episode 100	Average Score: 28.663.42	max: 32.81
+Episode 100	Score: 27.68	Average Score: 28.66
+Episode 110	Score: 28.82	Average Score: 29.7561
+Episode 120	Score: 31.19	Average Score: 29.9472
+Timestep 999	Score: 30.32	min: 24.88	max: 36.12
+Environment solved in 26 episodes!	Average Score: 30.00	
 
 ```
 
-The weight initialization from the single-agent environment acted as a good initilization for the multi-agent environment. The multi-agent environment has reached a score of +30 and shows a stable behavior onwards with minor oscillations around the goal. 
+The weight initialization from the single-agent environment acted as a good initilization for the multi-agent environment. The multi-agent environment has reached an average score of 30 and a max of 36.12 over 100 episodes, and shows a stable behavior onwards with minor oscillations around the goal. 
 
 
 ## Ideas for Future Work
